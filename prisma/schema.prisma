@@ -1,0 +1,373 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String?  @unique
+  telegramId  String?  @unique
+  username    String?
+  firstName   String?
+  lastName    String?
+  password    String?
+  role        Role     @default(USER)
+  language    String   @default("en") // User's preferred language
+  isActive    Boolean  @default(true)
+  referralCode String? @unique // User's own referral code
+  referredBy   String? // Referral code used during signup
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  profile         Profile?
+  wallet          Wallet?
+  weights         Weight[]
+  payments        Payment[]
+  referrals       Referral[]       @relation("UserReferrals")
+  referredUsers   Referral[]       @relation("ReferrerUser")
+  fitnessGoals    FitnessGoal[]
+  goalProgress    GoalProgress[]
+  nutritionEntries NutritionEntry[]
+  workouts        Workout[]
+  walletTransactions WalletTransaction[]
+  
+  // Friendship relations
+  sentFriendRequests     Friendship[] @relation("FriendshipRequester")
+  receivedFriendRequests Friendship[] @relation("FriendshipReceiver")
+
+  @@map("users")
+}
+
+model FitnessGoal {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String?
+  targetValue Float?
+  currentValue Float   @default(0)
+  unit        String?
+  category    String
+  status      String   @default("active")
+  targetDate  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  progress GoalProgress[]
+
+  @@map("fitness_goals")
+}
+
+model GoalProgress {
+  id       String   @id @default(cuid())
+  goalId   String
+  userId   String
+  value    Float
+  notes    String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  goal FitnessGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("goal_progress")
+}
+
+model NutritionEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime
+  mealType  String
+  foodName  String
+  quantity  Float
+  unit      String
+  calories  Float
+  protein   Float?
+  carbs     Float?
+  fat       Float?
+  fiber     Float?
+  sugar     Float?
+  sodium    Float?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("nutrition_entries")
+}
+
+model Profile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  age             Int?
+  gender          Gender?
+  height          Float?    // in cm
+  activityLevel   String?
+  fitnessGoals    String? // JSON string for SQLite compatibility
+  medicalHistory  String?
+  emergencyContact String?
+  profilePicture  String?
+  isOnboarded     Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Weight {
+  id        String   @id @default(cuid())
+  userId    String
+  weight    Float    // in kg
+  bmi       Float?
+  bmiCategory String?
+  notes     String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("weights")
+}
+
+model Wallet {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  balance   Float    @default(0)
+  currency  String   @default("IRT") // Iranian Toman
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ledger  WalletLedger[]
+
+  @@map("wallets")
+}
+
+model WalletLedger {
+  id            String            @id @default(cuid())
+  walletId      String
+  amount        Float
+  type          TransactionType
+  description   String
+  referenceId   String?           // Payment ID, Referral ID, etc.
+  referenceType String?           // "payment", "referral", "cashback", etc.
+  createdAt     DateTime          @default(now())
+
+  // Relations
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@map("wallet_ledger")
+}
+
+model WalletTransaction {
+  id              String                    @id @default(cuid())
+  userId          String
+  type            WalletTransactionType
+  amount          Float
+  currency        String                    @default("IRT")
+  status          WalletTransactionStatus   @default(PENDING)
+  
+  // For deposits
+  receiptUrl      String?
+  
+  // For withdrawals
+  cardNumber      String?
+  cardHolderName  String?
+  
+  adminNotes      String?
+  processedBy     String?                   // Admin user ID
+  processedAt     DateTime?
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("wallet_transactions")
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  userId          String
+  programId       String
+  amount          Float
+  currency        String        @default("IRT")
+  receiptUrl      String?
+  status          PaymentStatus @default(PENDING)
+  adminNotes      String?
+  processedBy     String?       // Admin user ID
+  processedAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  program Program @relation(fields: [programId], references: [id])
+
+  @@map("payments")
+}
+
+model Referral {
+  id              String    @id @default(cuid())
+  referrerId      String
+  referredUserId  String
+  referralCode    String    @unique
+  status          String    @default("active")
+  cashbackAmount  Float?
+  cashbackPaid    Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  referrer     User @relation("ReferrerUser", fields: [referrerId], references: [id], onDelete: Cascade)
+  referredUser User @relation("UserReferrals", fields: [referredUserId], references: [id], onDelete: Cascade)
+
+  @@map("referrals")
+}
+
+model Program {
+  id               String    @id @default(cuid())
+  name             String
+  description      String?
+  price            Float
+  originalPrice    Float?    // Store original price when discount is applied
+  discountPercentage Float?  // Store discount percentage (0-100)
+  currency         String    @default("IRT")
+  duration         Int       // in days
+  category         String?
+  features         String? // JSON string for SQLite compatibility
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  payments Payment[]
+
+  @@map("programs")
+}
+
+model Workout {
+  id            String     @id @default(cuid())
+  userId        String
+  name          String
+  type          String
+  duration      Int?       // in minutes
+  caloriesBurned Float?
+  notes         String?
+  completedAt   DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  // Relations
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercises Exercise[]
+
+  @@map("workouts")
+}
+
+model Exercise {
+  id        String   @id @default(cuid())
+  workoutId String
+  name      String
+  sets      Int?
+  reps      Int?
+  weight    Float?
+  duration  Int?     // in seconds
+  distance  Float?   // in meters
+  restTime  Int?     // in seconds
+  notes     String?
+  order     Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  workout Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
+  @@map("exercises")
+}
+
+model Friendship {
+  id          String           @id @default(cuid())
+  requesterId String
+  receiverId  String
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  // Relations
+  requester User @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiver  User @relation("FriendshipReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, receiverId])
+  @@map("friendships")
+}
+
+model AdminAudit {
+  id        String   @id @default(cuid())
+  adminId   String
+  action    String
+  target    String   // "payment", "user", "program", etc.
+  targetId  String
+  details   Json?
+  createdAt DateTime @default(now())
+
+  @@map("admin_audit")
+}
+
+// Enums
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REFUNDED
+}
+
+enum WalletTransactionType {
+  DEPOSIT
+  WITHDRAWAL
+}
+
+enum WalletTransactionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  BLOCKED
+}

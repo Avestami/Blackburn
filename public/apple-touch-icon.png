@@ -1,0 +1,6 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="180" height="180" rx="20" fill="#dc2626"/>
+  <path d="M45 90C45 65.15 65.15 45 90 45C114.85 45 135 65.15 135 90C135 114.85 114.85 135 90 135C65.15 135 45 114.85 45 90Z" fill="white"/>
+  <path d="M67.5 90C67.5 77.57 77.57 67.5 90 67.5C102.43 67.5 112.5 77.57 112.5 90C112.5 102.43 102.43 112.5 90 112.5C77.57 112.5 67.5 102.43 67.5 90Z" fill="#dc2626"/>
+  <text x="90" y="98" font-family="Arial, sans-serif" font-size="22" font-weight="bold" text-anchor="middle" fill="white">BB</text>
+</svg>

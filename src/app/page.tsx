@@ -1,103 +1,136 @@
-import Image from "next/image";
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/lib/auth"
+import { redirect } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link"
 
-export default function Home() {
+export default async function Home() {
+  const session = await getServerSession(authOptions)
+
+  // Redirect authenticated users to dashboard
+  if (session) {
+    redirect('/dashboard')
+  }
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-black">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-red-950/50 to-black opacity-95" />
+        <div className="relative container mx-auto px-4 py-32 text-center">
+          <h1 className="text-6xl md:text-8xl font-bold text-white mb-8 tracking-tight">
+            Transform Your Body,
+            <br />
+            <span className="bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">Transform Your Life</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
+            Professional fitness programs, personalized coaching, and comprehensive tracking tools to help you achieve your fitness goals.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <Link href="/auth/signin">
+              <Button size="lg" className="text-lg px-10 py-6 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl shadow-2xl hover:shadow-red-500/25 transition-all duration-300 hover:scale-105">
+                Get Started Today
+              </Button>
+            </Link>
+            <Link href="#features">
+              <Button variant="outline" size="lg" className="text-lg px-10 py-6 border-red-500 text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-xl transition-all duration-300 hover:scale-105">
+                Learn More
+              </Button>
+            </Link>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="py-24 bg-gray-950/95">
+        <div className="container mx-auto px-4">
+          <h2 className="text-5xl font-bold text-center mb-16 text-white tracking-tight">
+            Why Choose <span className="bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">BlackBurn Fitness</span>?
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Card className="bg-black/90 border-red-500/30 hover:border-red-500/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-red-500/20">
+              <CardHeader>
+                <CardTitle className="text-xl text-white font-semibold">Professional Programs</CardTitle>
+                <CardDescription className="text-gray-400">
+                  Expert-designed fitness programs tailored to your goals and fitness level
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-black/90 border-red-500/30 hover:border-red-500/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-red-500/20">
+              <CardHeader>
+                <CardTitle className="text-xl text-white font-semibold">Weight Tracking</CardTitle>
+                <CardDescription className="text-gray-400">
+                  Comprehensive weight and BMI tracking with detailed progress analytics
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-black/90 border-red-500/30 hover:border-red-500/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-red-500/20">
+              <CardHeader>
+                <CardTitle className="text-xl text-white font-semibold">Referral Rewards</CardTitle>
+                <CardDescription className="text-gray-400">
+                  Earn cashback by referring friends and building your fitness community
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-black/90 border-red-500/30 hover:border-red-500/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-red-500/20">
+              <CardHeader>
+                <CardTitle className="text-xl text-white font-semibold">Secure Payments</CardTitle>
+                <CardDescription className="text-gray-400">
+                  Safe and secure payment processing with receipt verification
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-black/90 border-red-500/30 hover:border-red-500/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-red-500/20">
+              <CardHeader>
+                <CardTitle className="text-xl text-white font-semibold">Telegram Integration</CardTitle>
+                <CardDescription className="text-gray-400">
+                  Seamless login and notifications through Telegram for convenience
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-black/90 border-red-500/30 hover:border-red-500/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-red-500/20">
+              <CardHeader>
+                <CardTitle className="text-xl text-white font-semibold">Personal Dashboard</CardTitle>
+                <CardDescription className="text-gray-400">
+                  Centralized hub for all your fitness data, progress, and programs
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 bg-gradient-to-r from-red-600 to-red-700">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-5xl font-bold mb-8 text-white tracking-tight">
+            Ready to Start Your Fitness Journey?
+          </h2>
+          <p className="text-xl mb-12 text-red-100 max-w-2xl mx-auto">
+            Join thousands of users who have transformed their lives with BlackBurn Fitness
+          </p>
+          <Link href="/auth/signin">
+            <Button size="lg" className="text-lg px-10 py-6 bg-white text-red-600 hover:bg-gray-100 font-semibold rounded-xl shadow-2xl transition-all duration-300 hover:scale-105">
+              Sign Up Now
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-black border-t border-red-500/30 py-12">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-gray-400 text-lg">
+            © 2024 <span className="text-red-500 font-semibold">BlackBurn Fitness</span>. All rights reserved.
+          </p>
+        </div>
       </footer>
     </div>
-  );
+  )
 }

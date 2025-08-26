@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+
+  # Next.js Web Application
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: blackburn-web
+    ports:
+      - "4444:3000"
+    environment:
+      - DATABASE_URL=file:/app/data/production.db
+      - NEXTAUTH_URL=http://localhost:4444
+      - NEXTAUTH_SECRET=your-production-secret-key-change-this
+      - NODE_ENV=production
+      - PORT=3000
+    networks:
+      - blackburn-network
+    volumes:
+      - sqlite_data:/app/data
+    restart: unless-stopped
+
+
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: blackburn-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - web
+    networks:
+      - blackburn-network
+    restart: unless-stopped
+
+volumes:
+  sqlite_data:
+
+networks:
+  blackburn-network:
+    driver: bridge
