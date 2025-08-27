@@ -46,6 +46,9 @@ EXPOSE 3000
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+ENV NEXTAUTH_SECRET=your-production-secret-key-change-this-in-production
+ENV NEXTAUTH_URL=http://103.75.197.66:4444
+ENV DATABASE_URL=file:/app/data/production.db
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
@@ -63,7 +66,7 @@ if [ ! -f "/app/data/production.db" ]; then
 fi
 
 # Start the application
-exec npm start
+exec node .next/standalone/server.js
 EOF
 
 RUN chmod +x /app/start.sh
