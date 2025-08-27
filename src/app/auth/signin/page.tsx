@@ -20,7 +20,19 @@ export default function SignInPage() {
   const [telegramId, setTelegramId] = useState("")
   const [password, setPassword] = useState("")
   const router = useRouter()
-  const { t } = useLanguage()
+  const { t, loading: languageLoading } = useLanguage()
+
+  // Show loading spinner while language is loading
+  if (languageLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-red-500 mx-auto mb-4" />
+          <p className="text-white">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
