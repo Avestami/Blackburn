@@ -25,12 +25,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (mounted) {
-      // Apply theme class to document element
-      document.documentElement.className = theme
+      // Apply theme class to document element without overwriting existing classes
+      const root = document.documentElement
+      root.classList.remove('light', 'dark')
+      root.classList.add(theme)
       
       // Set CSS custom properties based on theme
-      const root = document.documentElement
-      
       if (theme === 'light') {
         root.style.setProperty('--bg-color', '#ffffff')
         root.style.setProperty('--text-color', '#000000')

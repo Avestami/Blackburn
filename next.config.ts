@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
-import withPWA from "next-pwa";
+const withPWA = require("next-pwa");
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   turbopack: {
     root: __dirname,
   },

@@ -1,26 +1,5 @@
-# Build stage
-FROM node:20-bullseye AS builder
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-COPY prisma ./prisma/
-
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
-
-# Copy source code
-COPY . .
-
-# Generate Prisma client
-RUN npx prisma generate
-
-# Build the application
-RUN npm run build
-
 # Production stage
-FROM node:20-slim AS runner
+FROM node:20-slim AS production
 
 WORKDIR /app
 
@@ -31,16 +10,30 @@ RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Copy package files first for better caching
+COPY package*.json ./
+
+# Configure npm for better reliability
+RUN npm config set registry https://registry.npmjs.org/
+RUN npm config set fetch-retry-mintimeout 20000
+RUN npm config set fetch-retry-maxtimeout 120000
+RUN npm config set fetch-retries 3
+RUN npm config set maxsockets 1
+
+# Install dependencies with retry logic
+RUN npm ci --only=production --no-audit --no-fund || npm ci --only=production --no-audit --no-fund || npm install --only=production --no-audit --no-fund
+
+# Copy application files
+COPY . .
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Build the application
+RUN npm run build
+
 # Create data directory for SQLite
 RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
-
-# Copy built application
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/package*.json ./
 
 # Set correct permissions
 RUN chown -R nextjs:nodejs /app

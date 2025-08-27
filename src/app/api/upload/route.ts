@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { writeFile } from 'fs/promises'
 import { join } from 'path'
-import { v4 as uuidv4 } from 'uuid'
+const { v4: uuidv4 } = require('uuid')
 
 export async function POST(request: NextRequest) {
   try {
