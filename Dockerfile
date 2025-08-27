@@ -63,7 +63,7 @@ if [ ! -f "/app/data/production.db" ]; then
 fi
 
 # Start the application
-exec node server.js
+exec npm start
 EOF
 
 RUN chmod +x /app/start.sh
