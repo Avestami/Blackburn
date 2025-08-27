@@ -32,6 +32,10 @@ RUN npx prisma generate
 # Build the application
 RUN npm run build
 
+# Copy static files for standalone mode
+RUN cp -r /app/.next/static /app/.next/standalone/.next/
+RUN cp -r /app/public /app/.next/standalone/
+
 # Create data directory for SQLite
 RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
 
